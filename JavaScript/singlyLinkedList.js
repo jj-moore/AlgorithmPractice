@@ -5,6 +5,7 @@ class Node {
   }
 }
 
+// push, pop, shift, unshift, get, set, insert, remove, reverse, print
 class SinglyLinkedList {
   constructor() {
     this.head = null;
@@ -87,12 +88,77 @@ class SinglyLinkedList {
     }
     return !!node;
   }
+
+  insert(index, val) {
+    if (index < 0 || index > this.length) {
+      return false;
+    }
+    if (index === 0) {
+      return !!this.unshift(val);
+    }
+    if (index === this.length) {
+      return !!this.push(val);
+    }
+
+    const newNode = new Node(val);
+    const previous = this.get(index - 1);
+    newNode.next = previous.next;
+    previous.next = newNode;
+    this.length++;
+    return true;
+  }
+
+  remove(index) {
+    if (index < 0 || index >= this.length) {
+      return undefined;
+    }
+    if (index === 0) {
+      return this.shift();
+    }
+    if (index === this.length - 1) {
+      return this.pop();
+    }
+    const previous = this.get(index - 1);
+    const removed = previous.next;
+    previous.next = removed.next;
+    this.length--;
+    return removed;
+  }
+
+  reverse() {
+    let current = this.head;
+    let previous = null;
+    let next = null;
+
+    while (current) {
+      next = current.next;
+      current.next = previous;
+      previous = current;
+      current = next;
+    }
+
+    this.tail = this.head;
+    this.head = previous;
+    return this;
+  }
+
+  print() {
+    let arr = [];
+    let current = this.head;
+    while(current) {
+      arr.push(current.val);
+      current = current.next;
+    }
+    console.log(arr);
+  }
 }
 
 const list = new SinglyLinkedList();
-list.unshift('1');
-list.push('2');
-list.push('3');
-console.log(list);
-console.log(list.set('1', "joe"));
-console.log(list);
+list.push(100);
+list.push(201);
+list.push(250);
+list.push(350);
+list.push(999);
+list.print();
+list.reverse();
+list.print();
