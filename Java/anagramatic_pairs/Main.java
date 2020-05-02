@@ -1,4 +1,4 @@
-package anagram;
+package anagramatic_pairs;
 
 import java.io.*;
 import java.math.*;

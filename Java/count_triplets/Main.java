@@ -1,4 +1,4 @@
-package counttriplets;
+package count_triplets;
 
 import java.io.*;
 import java.math.*;

@@ -1,4 +1,4 @@
-package twopairs;
+package two_pairs;
 
 import java.io.*;
 import java.math.*;
