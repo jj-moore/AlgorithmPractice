@@ -12,10 +12,17 @@ class Solution {
   static long inversions = 0L;
 
   public static void main(String[] args) {
-    //int[] arr = {1, 4, 7, 2, 8, 5};
-    int[] arr = {7, 5, 3, 1};
+    int[] arr = {1, 4, 7, 2, 8, 5};
+    // int[] arr = {7, 5, 3, 1};
     long inversionCount = countInversions(arr);
     System.out.println("Inversions: " + inversionCount);
+  }
+
+  static void print(int[] arr) {
+    for (int num : arr) {
+      System.out.print(num + " ");
+    }
+    System.out.println();
   }
 
   // Complete the countInversions function below.
@@ -26,40 +33,40 @@ class Solution {
   }
 
   static int[] mergeSort(int[] arr) {
-    if (arr.length <= 1) {
+    int arrLength = arr.length;
+    if (arrLength <= 1) {
         return arr;
     }
-
-    int mid = arr.length / 2;
+    int mid = arrLength / 2;
     int[] left = mergeSort(Arrays.copyOfRange(arr, 0, mid));
-    int[] right = mergeSort(Arrays.copyOfRange(arr, mid, arr.length));
-    int[] merged = new int[left.length + right.length];
+    int[] right = mergeSort(Arrays.copyOfRange(arr, mid, arrLength));
 
     int leftPtr = 0;
     int rightPtr = 0;
+
     while (leftPtr < left.length && rightPtr < right.length) {
       if (left[leftPtr] <= right[rightPtr]) {
-        merged[leftPtr + rightPtr] = left[leftPtr];
+        arr[leftPtr + rightPtr] = left[leftPtr];
         leftPtr++;
       }
       else {
-        merged[leftPtr + rightPtr] = right[rightPtr];
+        arr[leftPtr + rightPtr] = right[rightPtr];
         rightPtr++;
         inversions += left.length - leftPtr;
       }
     }
 
     while (leftPtr < left.length) {
-      merged[leftPtr + rightPtr] = left[leftPtr];
+      arr[leftPtr + rightPtr] = left[leftPtr];
       leftPtr++;
     }
 
     while (rightPtr < right.length) {
-      merged[leftPtr + rightPtr] = right[rightPtr];
+      arr[leftPtr + rightPtr] = right[rightPtr];
       rightPtr++;
     }
 
-    return merged;
+    return arr;
   }
 
 }
