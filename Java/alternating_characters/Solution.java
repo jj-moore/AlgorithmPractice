@@ -18,12 +18,6 @@ public class Solution {
   }
 
   static int alternatingCharacters(String s) {
-
-    // int solution = 0;
-    // char[] arr = s.toCharArray();
-    // for (int i = 1; i < arr.length; i++) {
-    //   solution += Math.abs(arr[i] - arr[i - 1]) == 1 ? 0 : 1;
-    // }
     char[] arr = s.toCharArray();
     int solution = IntStream.range(1, arr.length)
       .reduce(0, (subtotal, current) -> {
