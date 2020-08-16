@@ -49,50 +49,49 @@ public class Solution {
     // Complete the crosswordPuzzle function below.
     static String[] crosswordPuzzle(String[] crossword, String words) {
       String[] myWords = words.split(";");
-      //printCrossword(myWords);
-
-      FirstLetter[] firstLetters = getFirstLetters(crossword, myWords.length);
-      //printFirstLetters(firstLetters);
-
-      solve(crossword, firstLetters, myWords);
-      return new String[] {};
+      CrosswordField[] fields = getCrosswordFields(crossword, myWords.length);
+      String[] solution = solve(crossword, fields, myWords);
+      printStringArray(solution);
+      return solution;
     }
 
-    static void solve(String[] crossword, FirstLetter[] firstLetters, String[] words) {
+    static String[] solve(String[] crossword, CrosswordField[] fields, String[] words) {
       if (words.length == 0) {
-        printCrossword(crossword);
+        return crossword;
+      }
+      else if (crossword == null) {
+        return crossword;
       }
       else {
-        for (int i = 0; i < firstLetters.length; i++) {
+        for (int i = 0; i < fields.length; i++) {
           int failed = 0;
           for (int j = 0; j < words.length; j++) {
-            if (!canMatch(crossword, firstLetters[i], words[j])) {
+            if (!canMatch(crossword, fields[i], words[j])) {
               failed++;
               if (failed == words.length) {
-                return;
+                return crossword;
               } else {
                 continue;
               }
             }
 
-            String[] newCrossword = replaceWord(crossword, firstLetters[i], words[j]);
+            String[] newCrossword = replaceWord(crossword, fields[i], words[j]);
             String[] newWords = removeWordFromArray(words, words[j]);
-            //printCrossword(newCrossword);
-            //printCrossword(newWords);
-            solve(newCrossword, firstLetters, newWords);
+            return solve(newCrossword, fields, newWords);
           }
         }
       }
+      return crossword;
     }
 
-    static boolean canMatch(String[] crossword, FirstLetter firstLetter, String word) {
-      if (word.length() != firstLetter.length) {
+    static boolean canMatch(String[] crossword, CrosswordField field, String word) {
+      if (word.length() != field.length) {
         return false;
       }
 
-      if (firstLetter.isHorizontal) {
+      if (field.isHorizontal) {
         for (int i = 0; i < word.length(); i++) {
-          char current = crossword[firstLetter.row].charAt(firstLetter.col + i);
+          char current = crossword[field.row].charAt(field.col + i);
           if (current != '-' && current != word.charAt(i)) {
             return false;
           }
@@ -101,7 +100,7 @@ public class Solution {
       }
       else {
         for (int i = 0; i < word.length(); i++) {
-          char current = crossword[firstLetter.row + i].charAt(firstLetter.col);
+          char current = crossword[field.row + i].charAt(field.col);
           if (current != '-' && current != word.charAt(i)) {
             return false;
           }
@@ -110,8 +109,8 @@ public class Solution {
       }
     }
 
-    static FirstLetter[] getFirstLetters(String[] crossword, int wordCount) {
-      FirstLetter[] firstLetters = new FirstLetter[wordCount];
+    static CrosswordField[] getCrosswordFields(String[] crossword, int wordCount) {
+      CrosswordField[] fields = new CrosswordField[wordCount];
       int index = 0;
 
       for (int row = 0; row < crossword.length; row++) {
@@ -120,17 +119,17 @@ public class Solution {
           int verticalWord = isFirstLetterVertical(crossword, row, col);
           int horizontalWord = isFirstLetterHorizontal(crossword, row, col);
           if (verticalWord > 0) {
-            firstLetters[index] = new FirstLetter(row, col, false, verticalWord);
+            fields[index] = new CrosswordField(row, col, false, verticalWord);
             index++;
           }
           if (horizontalWord > 0) {
-            firstLetters[index] = new FirstLetter(row, col, true, horizontalWord);
+            fields[index] = new CrosswordField(row, col, true, horizontalWord);
             index++;
           }
 
         } // END COL
       } // END ROW
-      return firstLetters;
+      return fields;
     }
 
     static int isFirstLetterVertical(String[] crossword, int row, int col) {
@@ -191,13 +190,6 @@ public class Solution {
       }
     }
 
-    static void printCrossword(String[] crossword) {
-      for (String row : crossword) {
-        System.out.println(row);
-      }
-      System.out.println();
-    }
-
     static String[] removeWordFromArray(String[] arr, String word) {
       String[] newArr = new String[arr.length - 1];
       int newIndex = 0;
@@ -211,19 +203,19 @@ public class Solution {
       return newArr;
     }
 
-    static String[] replaceWord(String[] crossword, FirstLetter firstLetter, String word) {
+    static String[] replaceWord(String[] crossword, CrosswordField field, String word) {
       String[] newCrossword = new String[crossword.length];
       for (int i = 0; i < crossword.length; i++) {
         newCrossword[i] = crossword[i];
       }
-      if (firstLetter.isHorizontal) {
-        StringBuilder newRow = new StringBuilder(crossword[firstLetter.row]);
-        newRow.replace(firstLetter.col, firstLetter.col + firstLetter.length, word);
-        newCrossword[firstLetter.row] = newRow.toString();
+      if (field.isHorizontal) {
+        StringBuilder newRow = new StringBuilder(crossword[field.row]);
+        newRow.replace(field.col, field.col + field.length, word);
+        newCrossword[field.row] = newRow.toString();
       }
       else {
-        for (int i = 0; i < firstLetter.length; i++) {
-          newCrossword[firstLetter.row + i] = replaceChar(newCrossword[firstLetter.row + i], word.charAt(i), firstLetter.col);
+        for (int i = 0; i < field.length; i++) {
+          newCrossword[field.row + i] = replaceChar(newCrossword[field.row + i], word.charAt(i), field.col);
         }
       }
       return newCrossword;
@@ -235,25 +227,22 @@ public class Solution {
     	    return myString.toString();
     	}
 
-      static void printFirstLetters(FirstLetter[] firstLetters) {
-        for (FirstLetter firstLetter : firstLetters) {
-          System.out.println(
-            "row: " + firstLetter.row +
-            " col: " + firstLetter.col +
-            " length: " + firstLetter.length +
-            " isHorizontal: " + firstLetter.isHorizontal);
+      static void printStringArray(String[] crossword) {
+        for (String row : crossword) {
+          System.out.println(row);
         }
+        System.out.println();
       }
   }
 
-  class FirstLetter {
+  class CrosswordField {
     int row;
     int col;
     int length;
     boolean isHorizontal;
     boolean filled;
 
-    FirstLetter(int row, int col, boolean isHorizontal, int length) {
+    CrosswordField(int row, int col, boolean isHorizontal, int length) {
       this.row = row;
       this.col = col;
       this.length = length;
