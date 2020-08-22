@@ -42,71 +42,94 @@ public class Solution {
         "++++++-+++",
         "++++++++++"
       };
-      String words2 = "POLAND;LHASA;SPAIN;INDIA";
+      String words2 = "POLAND;INDIA;LHASA;SPAIN";
 
-      crosswordPuzzle(crossword2, words2);
+      String[] crossword3 = new String[] {
+        "XXXXXX-XXX",
+        "XX------XX",
+        "XXXXXX-XXX",
+        "XXXXXX-XXX",
+        "XXX------X",
+        "XXXXXX-X-X",
+        "XXXXXX-X-X",
+        "XXXXXXXX-X",
+        "XXXXXXXX-X",
+        "XXXXXXXX-X"
+      };
+      String words3 = "ICELAND;MEXICO;PANAMA;ALMATY";
+      crosswordPuzzle(crossword, words);
     }
     // Complete the crosswordPuzzle function below.
-    static String[] crosswordPuzzle(String[] crossword, String words) {
+    static void crosswordPuzzle(String[] crossword, String words) {
       String[] myWords = words.split(";");
       CrosswordField[] fields = getCrosswordFields(crossword, myWords.length);
-      String[] solution = solve(crossword, fields, myWords);
-      printStringArray(solution);
-      return solution;
-    }
 
-    static String[] solve(String[] crossword, CrosswordField[] fields, String[] words) {
-      if (words.length == 0) {
-        return crossword;
-      }
-      else if (crossword == null) {
-        return crossword;
+      boolean hasSolution = isSolution(crossword, fields, myWords);
+      if (hasSolution) {
+        printStringArray(crossword);
       }
       else {
-        for (int i = 0; i < fields.length; i++) {
-          int failed = 0;
-          for (int j = 0; j < words.length; j++) {
-            if (!canMatch(crossword, fields[i], words[j])) {
-              failed++;
-              if (failed == words.length) {
-                return crossword;
-              } else {
-                continue;
-              }
-            }
+        System.out.println("No solution");
+      }
+    }
 
-            String[] newCrossword = replaceWord(crossword, fields[i], words[j]);
-            String[] newWords = removeWordFromArray(words, words[j]);
-            return solve(newCrossword, fields, newWords);
+    static boolean isSolution(String[] crossword, CrosswordField[] fields, String[] words) {
+      // FIND FIRST EMPTY FIELD AND MARK IT
+      CrosswordField nextField = null;
+      for (CrosswordField field : fields) {
+        if (!field.marked) {
+          nextField = field;
+          break;
+        }
+      }
+      // IF NO EMPTY FIELDS, WE'RE DONE
+      if (nextField == null) {
+        return true;
+      }
+      // FIND WORD THAT CAN FIT
+      for (String word : words) {
+        boolean willFit = willFit(crossword, nextField, word);
+        if (willFit) {
+          nextField.marked = true;
+          placeWord(crossword, nextField, word);
+          printStringArray(crossword);
+          // CHECK IF THIS PATH WILL LEAD TO A SOLUTION
+          boolean isSolution = isSolution(crossword, fields, words);
+          if (isSolution) {
+            return true;
+          }
+          else {
+            // BACKTRACK BY UNDOING THE WORD PLACEMENT AND TRYING THE NEXT WORD
+            placeWord(crossword, nextField, word.replaceAll("[A-Z]","-"));
           }
         }
       }
-      return crossword;
+      // IF NO WORDS LEAD TO A SOLUTION, NO SOLUTION
+      return false;
     }
 
-    static boolean canMatch(String[] crossword, CrosswordField field, String word) {
+    static boolean willFit(String[] crossword, CrosswordField field, String word) {
       if (word.length() != field.length) {
         return false;
       }
 
-      if (field.isHorizontal) {
-        for (int i = 0; i < word.length(); i++) {
-          char current = crossword[field.row].charAt(field.col + i);
-          if (current != '-' && current != word.charAt(i)) {
-            return false;
-          }
+      int row = field.row;;
+      int col = field.col;
+      for (char char1 : word.toCharArray()) {
+        char char2 = crossword[row].charAt(col);
+        if (char2 != '-' && char2 != char1) {
+          return false;
         }
-        return true;
-      }
-      else {
-        for (int i = 0; i < word.length(); i++) {
-          char current = crossword[field.row + i].charAt(field.col);
-          if (current != '-' && current != word.charAt(i)) {
-            return false;
-          }
+
+        if (field.isHorizontal) {
+          col++;
         }
-        return true;
+        else {
+          row++;
+        }
+
       }
+      return true;
     }
 
     static CrosswordField[] getCrosswordFields(String[] crossword, int wordCount) {
@@ -139,7 +162,7 @@ public class Solution {
       if (crossword[row].charAt(col) != '-' || crossword[row + 1].charAt(col) != '-') {
         return -1;
       }
-      if (row == 0 || crossword[row - 1].charAt(col) == '+') {
+      if (row == 0 || crossword[row - 1].charAt(col) == '+' || crossword[row - 1].charAt(col) == 'X') {
         int length = 0;
         while (row < crossword.length && crossword[row].charAt(col) == '-') {
           length++;
@@ -157,7 +180,7 @@ public class Solution {
       if (crossword[row].charAt(col) != '-' || crossword[row].charAt(col + 1) != '-') {
         return -1;
       }
-      if (col == 0 || crossword[row].charAt(col - 1) == '+') {
+      if (col == 0 || crossword[row].charAt(col - 1) == '+' || crossword[row].charAt(col - 1) == 'X') {
         int length = 0;
         while (col < crossword[row].length() && crossword[row].charAt(col) == '-') {
           length++;
@@ -168,57 +191,18 @@ public class Solution {
       return -1;
     }
 
-    static int getPositionLength(String[] crossword, int row, int col, int direction) {
-      int length = 0;
-      switch (direction) {
-        case -1:
-          return 0;
-        case 0:
-          while (col < crossword[row].length() && crossword[row].charAt(col) != '+') {
-            length++;
-            col++;
-          }
-          return length;
-        case 1:
-          while (row < crossword.length && crossword[row].charAt(col) != '+') {
-            length++;
-            row++;
-          }
-          return length;
-        default:
-          return 0;
-      }
-    }
-
-    static String[] removeWordFromArray(String[] arr, String word) {
-      String[] newArr = new String[arr.length - 1];
-      int newIndex = 0;
-      for (int i = 0; i < arr.length; i++) {
-        if (arr[i].equals(word) || newIndex >= newArr.length) {
-          continue;
-        }
-        newArr[newIndex] = arr[i];
-        newIndex++;
-      }
-      return newArr;
-    }
-
-    static String[] replaceWord(String[] crossword, CrosswordField field, String word) {
-      String[] newCrossword = new String[crossword.length];
-      for (int i = 0; i < crossword.length; i++) {
-        newCrossword[i] = crossword[i];
-      }
+    static String[] placeWord(String[] crossword, CrosswordField field, String word) {
       if (field.isHorizontal) {
         StringBuilder newRow = new StringBuilder(crossword[field.row]);
         newRow.replace(field.col, field.col + field.length, word);
-        newCrossword[field.row] = newRow.toString();
+        crossword[field.row] = newRow.toString();
       }
       else {
         for (int i = 0; i < field.length; i++) {
-          newCrossword[field.row + i] = replaceChar(newCrossword[field.row + i], word.charAt(i), field.col);
+          crossword[field.row + i] = replaceChar(crossword[field.row + i], word.charAt(i), field.col);
         }
       }
-      return newCrossword;
+      return crossword;
     }
 
     static String replaceChar(String str, char ch, int index) {
@@ -240,13 +224,13 @@ public class Solution {
     int col;
     int length;
     boolean isHorizontal;
-    boolean filled;
+    boolean marked;
 
     CrosswordField(int row, int col, boolean isHorizontal, int length) {
       this.row = row;
       this.col = col;
       this.length = length;
       this.isHorizontal = isHorizontal;
-      this.filled = false;
+      this.marked = false;
     }
   }
