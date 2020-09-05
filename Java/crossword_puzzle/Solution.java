@@ -3,6 +3,8 @@
 either + or -. Cells marked with a - are to be filled with the word list.
 recursion/dynamic programming
 */
+
+// SOLUTION COULD BE IMPROVED AS IT COMPARES PREVIOUSLY PLACED WORDS WITH SPOTS
 package crossword_puzzle;
 
 import java.io.*;
@@ -74,7 +76,7 @@ public class Solution {
     }
 
     static boolean isSolution(String[] crossword, CrosswordField[] fields, String[] words) {
-      // FIND FIRST EMPTY FIELD AND MARK IT
+      // FIND FIRST EMPTY FIELD
       CrosswordField nextField = null;
       for (CrosswordField field : fields) {
         if (!field.marked) {
@@ -100,6 +102,7 @@ public class Solution {
           }
           else {
             // BACKTRACK BY UNDOING THE WORD PLACEMENT AND TRYING THE NEXT WORD
+            nextField.marked = false;
             placeWord(crossword, nextField, word.replaceAll("[A-Z]","-"));
           }
         }
